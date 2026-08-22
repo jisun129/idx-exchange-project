@@ -2,8 +2,6 @@
 
 A regression project that predicts home sale price (`ClosePrice`) using monthly CRMLS (California Regional MLS) sales data. The work was carried out over 10 weeks: data exploration → preprocessing/feature engineering → baseline model → model comparison → advanced models (gradient boosting) → extended evaluation.
 
-> **Note**: In several places, the markdown narrative inside the notebooks disagreed with the actual numbers printed by the cells. This README is written from the **actual cell outputs**, not the markdown prose. (For example, the "Summary" section in `06_evaluation.ipynb` was written as a note before a fourth model (LightGBM) was added, and its numbers are off by roughly an order of magnitude from what the cells actually output.)
-
 ---
 
 ## 1. Dataset
