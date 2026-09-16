@@ -19,21 +19,34 @@ several models trained, tuned, and compared.
 - Column-level descriptions and drop decisions are documented in `columns.xlsx`.
 
 > The raw CSV files (`CRMLSSold*.csv`) are not included in this repository due to size/licensing
-> constraints. To reproduce the pipeline, place CRMLS sold-listing data in the same format at the
-> project root.
+> constraints. To reproduce the pipeline, place CRMLS sold-listing data in the same format inside
+> `notebooks/` (see Section 6.2 — the notebooks are run from, and read/write files in, that
+> folder).
 
 ## 2. Repository Structure
 
 ```
-├── 01_exploration.ipynb        # Merge monthly CSVs into one file, filter, exploratory analysis (EDA)
-├── 02_preprocessing.ipynb      # Missing-value handling, outlier handling, feature engineering, encoding/scaling, train/test split
-├── 03_baseline_model.ipynb     # Linear Regression baseline (log-transformed target)
-├── 04_model_comparison.ipynb   # Decision Tree / Random Forest comparison and depth tuning
-├── 05_advanced_models.ipynb    # XGBoost / LightGBM hyperparameter search
-├── 06_evaluation.ipynb         # Walk-forward CV tuning of all 5 models + MAPE/MdAPE evaluation by price band
+├── data/
+│   └── processed/              # Generated CSVs, copied here after running the notebooks
+│                                # (merged_sales_data.csv, cleaned_preprocessed_data.csv,
+│                                #  baseline/comparison/tuning results, metrics_summary.csv, ...)
+├── notebooks/
+│   ├── 01_exploration.ipynb        # Merge monthly CSVs into one file, filter, exploratory analysis (EDA)
+│   ├── 02_preprocessing.ipynb      # Missing-value handling, outlier handling, feature engineering, encoding/scaling, train/test split
+│   ├── 03_baseline_model.ipynb     # Linear Regression baseline (log-transformed target)
+│   ├── 04_model_comparison.ipynb   # Decision Tree / Random Forest comparison and depth tuning
+│   ├── 05_advanced_models.ipynb    # XGBoost / LightGBM hyperparameter search
+│   └── 06_evaluation.ipynb         # Walk-forward CV tuning of all 5 models + MAPE/MdAPE evaluation by price band
 ├── columns.xlsx                # Column descriptions and drop decisions
 └── README.md
 ```
+
+> **Note on paths**: every notebook reads/writes its CSVs using a bare filename (e.g.
+> `pd.read_csv("cleaned_preprocessed_data.csv")`), with no folder prefix. This means each
+> notebook must actually be **run from inside `notebooks/`** so it can find the previous
+> notebook's output there — the code does not read from or write to `data/processed/` directly.
+> `data/processed/` holds copies of the generated CSVs, moved there manually after running the
+> notebooks, for organization/version control. See Section 6.2 below for the exact steps.
 
 ## 3. Preprocessing Summary (`02_preprocessing.ipynb`)
 
@@ -46,9 +59,11 @@ several models trained, tuned, and compared.
 3. **Column-specific fixes**
    - `AssociationFee`: missing values filled with 0 (both NaN and 0 represent "no HOA" in this
      dataset).
-   - `Flooring`: the original column is kept and multi-hot encoded (`Flooring_Wood`,
-     `Flooring_Carpet`, etc.), while an additional `premium_score` / `grade` summary feature is
-     derived from the flooring material mix.
+   - `Flooring`: **not** used directly as a model feature — it's a multi-label column (e.g.
+     `"Carpet,Tile,Wood"`) and is dropped from the feature set. Before being dropped, it's used to
+     derive two summary features that *are* kept: `premium_score` (a 0–1 score based on the
+     material mix) and `grade` (a categorical bucket — "Likely Premium" / "Likely Budget" /
+     "Mixed/Mid-range" / "Unknown" — derived from `premium_score`).
 4. **Leakage / unnecessary column removal**: IDs, URLs, photos, agent info, date strings,
    near-unique address-like columns, and very-high-cardinality categorical columns (`City`,
    `PostalCode` as a raw feature, etc.) are excluded.
@@ -160,9 +175,20 @@ pip install pandas numpy matplotlib seaborn scikit-learn openpyxl geopandas shap
 
 ### 6.2 Run Order
 
-Each notebook reads a CSV produced by the previous one, so they **must be run in order**.
+Every notebook reads/writes its CSVs by bare filename (no folder prefix), so **all notebooks must
+be run from inside `notebooks/`** — launch Jupyter there (or set that as the working directory)
+so each notebook can find the previous notebook's output sitting next to it.
 
-1. **`01_exploration.ipynb`**: place the raw `CRMLSSold*.csv` files in the project root and run →
+```bash
+cd notebooks
+jupyter notebook
+# or
+jupyter lab
+```
+
+Each notebook reads a CSV produced by the previous one, so they **must be run in order**:
+
+1. **`01_exploration.ipynb`**: place the raw `CRMLSSold*.csv` files inside `notebooks/` and run →
    produces `merged_sales_data.csv`
 2. **`02_preprocessing.ipynb`**: reads `merged_sales_data.csv` and preprocesses it →
    produces `cleaned_preprocessed_data.csv`, `cleaned_preprocessed_data_old.csv`,
@@ -180,13 +206,12 @@ Each notebook reads a CSV produced by the previous one, so they **must be run in
    together (MAPE/MdAPE, performance by price band) → produces `metrics_summary.csv`. This is the
    final, most rigorous evaluation and its results table (Section 5 above) is the one to cite.
 
-Each notebook can simply be run top-to-bottom ("Run All") in Jupyter.
-
-```bash
-jupyter notebook
-# or
-jupyter lab
-```
+Once all six notebooks have been run (in order, inside `notebooks/`), copy the generated CSVs you
+want to keep — `merged_sales_data.csv`, `cleaned_preprocessed_data.csv`,
+`cleaned_preprocessed_data_old.csv`, `feature_engineering_comparison.csv`,
+`baseline_model_results.csv`, `model_comparison_results.csv`,
+`advanced_model_tuning_results.csv`, `advanced_model_results.csv`, `metrics_summary.csv` — into
+`data/processed/`. This step is manual; the notebooks themselves don't write there.
 
 ## 7. Notes / Limitations
 
