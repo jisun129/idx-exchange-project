@@ -1,0 +1,9 @@
+# Extra dependencies needed only to run notebooks/*.ipynb (model-selection narrative,
+# not required to reproduce the deployed model - see README Section 6).
+# Install alongside requirements.txt: pip install -r requirements.txt -r requirements-notebooks.txt
+
+jupyter
+matplotlib
+seaborn
+openpyxl
+xgboost>=2.0

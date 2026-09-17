@@ -1,0 +1,17 @@
+# Raw data: not committed (size/licensing - see README Section 1)
+data/raw/*
+!data/raw/.gitkeep
+
+# Processed data: regenerable by src/preprocess.py, not committed
+data/processed/*
+!data/processed/.gitkeep
+
+# models/ IS committed on purpose - app_full.py loads it directly, no retraining required
+# (see README Section 8)
+
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
