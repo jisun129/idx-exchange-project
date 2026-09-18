@@ -1,0 +1,20 @@
+[
+  "MultiSplit",
+  "MultiSplit,One",
+  "One",
+  "One,MultiSplit",
+  "One,ThreeOrMore",
+  "One,Two",
+  "One,Two,MultiSplit",
+  "One,Two,ThreeOrMore",
+  "One,Two,ThreeOrMore,MultiSplit",
+  "ThreeOrMore",
+  "ThreeOrMore,MultiSplit",
+  "ThreeOrMore,One",
+  "Two",
+  "Two,MultiSplit",
+  "Two,MultiSplit,One",
+  "Two,One",
+  "Two,ThreeOrMore",
+  "Two,ThreeOrMore,MultiSplit"
+]
